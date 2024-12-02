@@ -41,6 +41,7 @@ export default function CollapsibleFilters({
         >
           <div className="flex items-center gap-2">
             <Filter className={`w-5 h-5 ${isOpen ? '-mt-1.5' : ''}`} />
+            <span>Filter</span>
           </div>
           {isOpen ? (
             <ChevronUp className="w-5 h-5" />
