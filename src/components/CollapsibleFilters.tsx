@@ -33,8 +33,8 @@ export default function CollapsibleFilters({
   const [isOpen, setIsOpen] = useLocalStorage('filtersOpen', false);
 
   return (
-    <div className="bg-sky rounded-lg shadow mb-6">
-      <div className={`${isOpen ? 'p-4' : 'py-2 px-4'}`}>
+    <div className="bg-ocean shadow mb-6 sticky top-16 z-40">
+      <div className={`${isOpen ? 'p-4' : 'py-2 px-4'} bg-ocean`}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="w-full flex justify-between items-center text-white h-8"
