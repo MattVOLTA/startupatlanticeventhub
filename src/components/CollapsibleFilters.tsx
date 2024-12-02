@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { Organization } from '../types/database';
 import { OrganizationFilter } from './OrganizationFilter';
