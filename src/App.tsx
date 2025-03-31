@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Header } from './components/Header';
 import CollapsibleFilters from './components/CollapsibleFilters';
 import { useOrganizations } from './hooks/useOrganizations';
@@ -6,6 +6,7 @@ import { useEvents } from './hooks/useEvents';
 import { EventCard } from './components/EventCard';
 import { CalendarView } from './components/CalendarView';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { initDataLayer, trackPageView, trackEvent } from './utils/gtm';
 
 export default function App() {
   const [searchValue, setSearchValue] = useLocalStorage('searchValue', '');
@@ -23,49 +24,112 @@ export default function App() {
     selectedEventTypes
   );
 
+  // Initialize GTM data layer
+  useEffect(() => {
+    initDataLayer();
+    trackPageView('Event Hub Home');
+  }, []);
+
   const handleOrgSelect = (orgId: string) => {
     if (orgId === 'all') {
       setSelectedOrgs(['all']);
+      // Track selecting all organizations
+      trackEvent('filter_change', {
+        filter_type: 'organization',
+        filter_value: 'all',
+        action: 'select_all'
+      });
     } else {
+      const isSelected = selectedOrgs.includes(orgId);
       const newSelected = selectedOrgs.includes('all') 
         ? [orgId]
         : selectedOrgs.includes(orgId)
           ? selectedOrgs.filter(id => id !== orgId)
           : [...selectedOrgs, orgId];
       setSelectedOrgs(newSelected.length ? newSelected : ['all']);
+      
+      // Track organization selection/deselection
+      trackEvent('filter_change', {
+        filter_type: 'organization',
+        filter_value: orgId,
+        organization_name: organizations.find(org => org.id === orgId)?.name || orgId,
+        action: isSelected ? 'deselect' : 'select'
+      });
     }
   };
 
   const handleLocationSelect = (location: string) => {
     if (location === 'all') {
       setSelectedLocations([]);
+      // Track selecting all locations
+      trackEvent('filter_change', {
+        filter_type: 'location',
+        filter_value: 'all',
+        action: 'select_all'
+      });
     } else {
+      const isSelected = selectedLocations.includes(location);
       const newSelected = selectedLocations.includes(location)
         ? selectedLocations.filter(loc => loc !== location)
         : [...selectedLocations, location];
       setSelectedLocations(newSelected);
+      
+      // Track location selection/deselection
+      trackEvent('filter_change', {
+        filter_type: 'location',
+        filter_value: location,
+        action: isSelected ? 'deselect' : 'select'
+      });
     }
   };
 
   const handleInterestSelect = (interestId: string) => {
     if (interestId === 'all') {
       setSelectedInterests([]);
+      // Track selecting all interests
+      trackEvent('filter_change', {
+        filter_type: 'interest',
+        filter_value: 'all',
+        action: 'select_all'
+      });
     } else {
+      const isSelected = selectedInterests.includes(interestId);
       const newSelected = selectedInterests.includes(interestId)
         ? selectedInterests.filter(id => id !== interestId)
         : [...selectedInterests, interestId];
       setSelectedInterests(newSelected);
+      
+      // Track interest selection/deselection
+      trackEvent('filter_change', {
+        filter_type: 'interest',
+        filter_value: interestId,
+        action: isSelected ? 'deselect' : 'select'
+      });
     }
   };
 
   const handleEventTypeSelect = (type: string) => {
     if (type === 'all') {
       setSelectedEventTypes([]);
+      // Track selecting all event types
+      trackEvent('filter_change', {
+        filter_type: 'event_type',
+        filter_value: 'all',
+        action: 'select_all'
+      });
     } else {
+      const isSelected = selectedEventTypes.includes(type);
       const newSelected = selectedEventTypes.includes(type)
         ? selectedEventTypes.filter(t => t !== type)
         : [...selectedEventTypes, type];
       setSelectedEventTypes(newSelected);
+      
+      // Track event type selection/deselection
+      trackEvent('filter_change', {
+        filter_type: 'event_type',
+        filter_value: type,
+        action: isSelected ? 'deselect' : 'select'
+      });
     }
   };
 

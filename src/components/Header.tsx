@@ -2,6 +2,7 @@ import React from 'react';
 import { HeaderSearch } from './HeaderSearch';
 import { Logo } from './Logo';
 import { Calendar, LayoutGrid } from 'lucide-react';
+import { trackEvent } from '../utils/gtm';
 
 interface HeaderProps {
   searchValue: string;
@@ -16,6 +17,13 @@ export function Header({
   viewMode, 
   onViewModeChange 
 }: HeaderProps) {
+  
+  const handleViewModeChange = () => {
+    const newMode = viewMode === 'list' ? 'calendar' : 'list';
+    onViewModeChange(newMode);
+    trackEvent('view_mode_change', { mode: newMode });
+  };
+  
   return (
     <header className="bg-ocean shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,7 +40,7 @@ export function Header({
               onChange={onSearchChange}
             />
             <button
-              onClick={() => onViewModeChange(viewMode === 'list' ? 'calendar' : 'list')}
+              onClick={handleViewModeChange}
               className="p-2 text-white hover:bg-sky/20 rounded-full transition-colors"
               aria-label={`Switch to ${viewMode === 'list' ? 'calendar' : 'list'} view`}
             >

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Event } from '../types/database';
 import { Calendar, Clock, MapPin, Ticket } from 'lucide-react';
+import { trackEvent } from '../utils/gtm';
 
 interface EventCardProps {
   event: Event;
@@ -19,7 +20,25 @@ export function EventCard({ event }: EventCardProps) {
   };
 
   const handleClick = () => {
+    // Track event card click
+    trackEvent('event_card_click', {
+      event_id: event.id,
+      event_name: event.name,
+      organization: event.organizations?.name,
+      event_type: event.is_virtual ? 'Virtual' : 'In-Person'
+    });
     window.open(event.url, '_blank');
+  };
+
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Track registration click
+    trackEvent('event_registration_click', {
+      event_id: event.id,
+      event_name: event.name,
+      organization: event.organizations?.name,
+      event_type: event.is_virtual ? 'Virtual' : 'In-Person'
+    });
   };
 
   // Split description into sentences and take first 3
@@ -29,8 +48,8 @@ export function EventCard({ event }: EventCardProps) {
     return sentences.slice(0, 3).join(' ');
   };
 
-  // Check if event is free (either is_free is true or price is 0/null)
-  const isFreeEvent = event.is_free || !event.price || event.price <= 0;
+  // Check if event is free
+  const isFreeEvent = event.is_free;
 
   return (
     <div 
@@ -102,7 +121,7 @@ export function EventCard({ event }: EventCardProps) {
             href={event.url}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleRegisterClick}
             className="block w-full text-center bg-kitchen text-white px-4 py-2 rounded hover:bg-opacity-90 transition-colors"
           >
             Register Now
@@ -114,11 +133,11 @@ export function EventCard({ event }: EventCardProps) {
                 Organized by {event.organizations?.name}
               </div>
               <span className={`px-3 py-1 rounded-full text-sm ${
-                event.is_online 
+                event.is_virtual 
                   ? 'bg-rock text-white' 
                   : 'bg-netting text-white'
               }`}>
-                {event.is_online ? 'Virtual' : 'In-Person'}
+                {event.is_virtual ? 'Virtual' : 'In-Person'}
               </span>
             </div>
           </div>

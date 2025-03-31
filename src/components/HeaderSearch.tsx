@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
+import { trackEvent } from '../utils/gtm';
 
 interface HeaderSearchProps {
   value: string;
@@ -9,6 +10,8 @@ interface HeaderSearchProps {
 export function HeaderSearch({ value, onChange }: HeaderSearchProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [prevValue, setPrevValue] = useState('');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isExpanded) {
@@ -16,9 +19,34 @@ export function HeaderSearch({ value, onChange }: HeaderSearchProps) {
     }
   }, [isExpanded]);
 
+  useEffect(() => {
+    // Track search after user stops typing for 1 second
+    if (value && value !== prevValue) {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      
+      searchTimeoutRef.current = setTimeout(() => {
+        trackEvent('search', { search_term: value });
+        setPrevValue(value);
+      }, 1000);
+    }
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [value, prevValue]);
+
   const handleClose = () => {
     setIsExpanded(false);
     onChange('');
+  };
+
+  const handleClearSearch = () => {
+    onChange('');
+    trackEvent('clear_search');
   };
 
   return (
@@ -30,7 +58,10 @@ export function HeaderSearch({ value, onChange }: HeaderSearchProps) {
       >
         {!isExpanded ? (
           <button
-            onClick={() => setIsExpanded(true)}
+            onClick={() => {
+              setIsExpanded(true);
+              trackEvent('open_search');
+            }}
             className="p-1 hover:bg-sky/20 rounded-full"
             aria-label="Open search"
           >
@@ -49,7 +80,7 @@ export function HeaderSearch({ value, onChange }: HeaderSearchProps) {
             />
             {value && (
               <button
-                onClick={() => onChange('')}
+                onClick={handleClearSearch}
                 className="absolute right-8 top-1/2 transform -translate-y-1/2 p-1 hover:bg-sky/20 rounded-full"
                 aria-label="Clear search"
               >
@@ -57,7 +88,10 @@ export function HeaderSearch({ value, onChange }: HeaderSearchProps) {
               </button>
             )}
             <button
-              onClick={handleClose}
+              onClick={() => {
+                handleClose();
+                trackEvent('close_search');
+              }}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-sky/20 rounded-full"
               aria-label="Close search"
             >

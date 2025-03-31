@@ -5,6 +5,7 @@ import { LocationFilter } from './LocationFilter';
 import { InterestFilter } from './InterestFilter';
 import { EventTypeFilter } from './EventTypeFilter';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { trackEvent } from '../utils/gtm';
 
 interface CollapsibleFiltersProps {
   organizations: Organization[];
@@ -31,11 +32,21 @@ export default function CollapsibleFilters({
 }: CollapsibleFiltersProps) {
   const [isOpen, setIsOpen] = useLocalStorage('filtersOpen', false);
 
+  const handleToggleFilters = () => {
+    const newState = !isOpen;
+    setIsOpen(newState);
+    
+    // Track filter panel toggle
+    trackEvent('filter_panel_toggle', {
+      action: newState ? 'open' : 'close'
+    });
+  };
+
   return (
     <div className="bg-sky rounded-lg shadow mb-6">
       <div className={`${isOpen ? 'p-4' : 'py-2 px-4'}`}>
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleToggleFilters}
           className="w-full flex justify-between items-center text-white h-8"
         >
           <div className="flex items-center gap-2">
