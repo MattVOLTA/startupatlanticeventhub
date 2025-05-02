@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "sync-events": "node scripts/sync-events.js",
     "analyze-events": "node scripts/analyze-events.js",
-    "list-events": "node scripts/list-events.js"
+    "list-events": "node scripts/list-events.js",
+    "test-analysis": "node scripts/test-event-analysis.js",
+    "test-fix": "node scripts/fix-validation-test.js",
+    "dry-run": "node scripts/dry-run-test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
