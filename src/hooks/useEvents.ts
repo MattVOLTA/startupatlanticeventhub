@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Event } from '../types/database';
+import { Event, Interest } from '../types/database';
 import { supabase } from '../lib/supabase';
 import debounce from 'lodash/debounce';
 
@@ -10,13 +10,19 @@ interface FilterState {
   selectedEventTypes: string[];
 }
 
+// Define the shape of the event_interests relation returned from the database
+interface EventInterest {
+  interest_id: string;
+  interests: Interest;
+}
+
 export function useEvents(
   selectedOrgs: string[],
   selectedLocations: string[],
   selectedInterests: string[] = [],
   selectedEventTypes: string[] = []
 ) {
-  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [allEvents, setAllEvents] = useState<(Event & { event_interests?: EventInterest[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -71,7 +77,7 @@ export function useEvents(
 
       // Location filter
       if (selectedLocations.length > 0) {
-        const isVirtual = event.is_online;
+        const isVirtual = event.is_virtual;
         const eventCity = event.venue_city;
 
         if (!selectedLocations.includes('Virtual') && isVirtual) {
@@ -88,10 +94,10 @@ export function useEvents(
         const isVirtual = selectedEventTypes.includes('Virtual');
         const isInPerson = selectedEventTypes.includes('In-Person');
 
-        if (isVirtual && !isInPerson && !event.is_online) {
+        if (isVirtual && !isInPerson && !event.is_virtual) {
           return false;
         }
-        if (!isVirtual && isInPerson && event.is_online) {
+        if (!isVirtual && isInPerson && event.is_virtual) {
           return false;
         }
       }
