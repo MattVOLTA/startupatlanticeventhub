@@ -158,6 +158,7 @@ async function syncEvents() {
                 end_date: event.end.utc,
                 url: event.url,
                 is_online: event.online_event,
+                is_free: event.is_free,
                 is_shareable: event.shareable,
                 venue_name: event.venue?.name,
                 venue_address: event.venue?.address?.localized_address_display,

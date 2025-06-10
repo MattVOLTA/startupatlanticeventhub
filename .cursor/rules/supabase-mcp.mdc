@@ -1,0 +1,89 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Supabase MCP Tools Guide for Startup Atlantic Event Hub
+
+## Project Configuration
+- **Project ID**: `rlnaguafmnysmmhdpsry`
+- **Project Name**: Startup Atlantic Event Hub
+- **Region**: ca-central-1
+
+## Database Schema Overview
+
+### Main Tables
+1. **organizations** - Startup ecosystem organizations
+   - `id` (UUID, primary key)
+   - `name` (text)
+   - `eventbrite_id` (text, unique)
+   - `created_at` (timestamptz)
+
+2. **events** - Events from various organizations
+   - `id` (text, primary key - Eventbrite event ID)
+   - `name` (text)
+   - `description` (text)
+   - `detailed_summary` (text)
+   - `start_date` (timestamptz)
+   - `end_date` (timestamptz)
+   - `url` (text)
+   - `is_online` (boolean)
+   - `is_free` (boolean) - **Critical field for pricing**
+   - `is_shareable` (boolean)
+   - `venue_name` (text)
+   - `venue_city` (text)
+   - `venue_address` (text)
+   - `logo_url` (text)
+   - `organization_id` (UUID, FK to organizations)
+
+3. **interests** - Event categorization
+   - `id` (UUID, primary key)
+   - `name` (text, unique)
+   - `description` (text)
+
+4. **event_interests** - Many-to-many relationship
+   - `event_id` (text, FK to events)
+   - `interest_id` (UUID, FK to interests)
+
+## Environment Variables
+When using MCP tools, the project uses these environment variables:
+- `VITE_SUPABASE_URL`: https://rlnaguafmnysmmhdpsry.supabase.co
+- `VITE_SUPABASE_ANON_KEY`: Available in [.env](mdc:.env)
+- `VITE_EVENTBRITE_TOKEN`: For syncing events
+
+## Common MCP Tool Usage Patterns
+
+### Querying Events
+```sql
+-- Get upcoming free events
+SELECT name, start_date, venue_city, organizations.name as org_name
+FROM events 
+JOIN organizations ON events.organization_id = organizations.id
+WHERE is_free = true 
+AND end_date >= NOW()
+ORDER BY start_date;
+
+-- Event distribution by type
+SELECT is_free, COUNT(*) as count
+FROM events 
+WHERE end_date >= NOW()
+GROUP BY is_free;
+```
+
+### Syncing Process
+The [scripts/sync-events.js](mdc:scripts/sync-events.js) file handles data synchronization from Eventbrite API. Key fields mapping:
+- `event.is_free` → `is_free` (boolean)
+- `event.online_event` → `is_online` (boolean)
+- `event.name.text` → `name`
+
+## Important Notes
+- Always use project ID `rlnaguafmnysmmhdpsry` when calling Supabase MCP tools
+- The `is_free` field is critical - ensure it's properly synced from Eventbrite
+- Events are filtered by `is_shareable = true` and future `end_date` in the app
+- Organization relationships use UUID foreign keys
+- Event IDs are Eventbrite event IDs (text format)
+
+## Related Files
+- [src/hooks/useEvents.ts](mdc:src/hooks/useEvents.ts) - Main events data fetching
+- [src/types/database.ts](mdc:src/types/database.ts) - TypeScript interface definitions
+- [scripts/sync-events.js](mdc:scripts/sync-events.js) - Data synchronization script
