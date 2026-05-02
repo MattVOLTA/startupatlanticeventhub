@@ -1,0 +1,5 @@
+# Supabase CLI config — https://supabase.com/docs/guides/cli/config
+# Edge Functions: deploy with `supabase functions deploy sync-events`
+
+[functions.sync-events]
+verify_jwt = false

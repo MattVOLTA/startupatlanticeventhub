@@ -26,6 +26,10 @@ dist-ssr
 # Environment variables
 .env
 
+# Local agent and Supabase CLI state
+.codex/
+supabase/.temp/
+
 MCP.json
 .cursor/mcp.json
 .mcp.json

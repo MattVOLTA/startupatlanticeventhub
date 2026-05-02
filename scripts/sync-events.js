@@ -1,3 +1,7 @@
+/**
+ * Local helper for Eventbrite sync. Production schedule: Supabase Edge Function
+ * `supabase/functions/sync-events` + pg_cron — see supabase/sql/schedule_event_sync.sql
+ */
 import 'dotenv/config';
 import fetch from 'node-fetch';
 import { createClient } from '@supabase/supabase-js';

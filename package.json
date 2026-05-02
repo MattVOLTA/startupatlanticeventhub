@@ -8,8 +8,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "sync-events": "node scripts/sync-events.js",
+    "deploy:sync-function": "supabase functions deploy sync-events",
     "analyze-events": "node scripts/analyze-events.js",
     "list-events": "node scripts/list-events.js",
+    "compare-eventbrite": "node scripts/compare-eventbrite-supabase.js",
+    "compare-category-model": "node scripts/compare-category-model.js",
     "test-analysis": "node scripts/test-event-analysis.js",
     "test-fix": "node scripts/fix-validation-test.js",
     "dry-run": "node scripts/dry-run-test.js"
