@@ -22,11 +22,20 @@ npm run preview
 # Sync events from Eventbrite API
 npm run sync-events
 
+# Deploy production Supabase Edge Function
+npm run deploy:sync-function
+
 # Analyze events with OpenAI for categorization
 npm run analyze-events
 
 # List all events in database
 npm run list-events
+
+# Compare Eventbrite API, Supabase, and app-visible event counts
+npm run compare-eventbrite
+
+# Compare current categories against a fresh OpenAI classification pass
+npm run compare-category-model
 ```
 
 ### Testing & Validation Commands
@@ -59,8 +68,9 @@ Note: No linting or type-checking scripts are currently configured. Consider add
    - Row-level security disabled (public read access)
 
 3. **Data Pipeline**
-   - **Sync**: `scripts/sync-events.js` fetches from Eventbrite API
-   - **Analysis**: `scripts/analyze-events.js` uses OpenAI to generate summaries and categorize events
+   - **Production Sync + Analysis**: `supabase/functions/sync-events` fetches Eventbrite data, updates Supabase, and analyzes changed events
+   - **Schedule**: `supabase/sql/schedule_event_sync.sql` invokes the Edge Function daily through `pg_cron` + `pg_net`
+   - **Local Helpers**: `scripts/sync-events.js` and `scripts/analyze-events.js` remain available for manual/local workflows
    - **Storage**: Events stored in Supabase with relationships to organizations and interests
 
 ### Database Schema
@@ -99,7 +109,7 @@ Note: No linting or type-checking scripts are currently configured. Consider add
 
 2. **OpenAI API**
    - Used for generating event summaries and interest categorization
-   - GPT-4 model for analysis tasks
+   - Production Edge Function defaults to `gpt-5.4-mini` for interest analysis
    - Batch processing with retry logic
 
 3. **Google Tag Manager**
@@ -114,6 +124,8 @@ VITE_SUPABASE_URL=https://rlnaguafmnysmmhdpsry.supabase.co
 VITE_SUPABASE_ANON_KEY=[your-anon-key]
 VITE_EVENTBRITE_TOKEN=[your-eventbrite-token]
 OPENAI_API_KEY=[your-openai-key]
+SUPABASE_SERVICE_ROLE_KEY=[server-side only]
+CRON_SECRET=[shared secret for scheduled Edge Function invocations]
 ```
 
 ## Key Implementation Details
